@@ -4,10 +4,12 @@ import { ChartModule } from 'angular2-chartjs';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { BarChartComponent } from './bar-chart/bar-chart.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    BarChartComponent
   ],
   imports: [
     BrowserModule,
