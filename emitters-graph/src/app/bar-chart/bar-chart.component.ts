@@ -2,7 +2,9 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import Chart from 'chart.js/auto';
 
 const EMITTERS_RADIUS = 10;
+const MAX_EMITTERS_IN_GRAPH = 100000;
 const MAX_FREQ = 40;
+const MIN_FREQ = 0;
 const MAX_ANGLE = 180;
 const MIN_ANGLE = -180;
 
@@ -16,27 +18,27 @@ export class BarChartComponent implements AfterViewInit {
   @ViewChild('barCanvas') private barCanvas: ElementRef;
   barChart: any;
 
-  emittersArrData: { x: number, y: number, r: number }[] = [];
-
   constructor() { }
 
   ngAfterViewInit(): void {
-    this.createRandNumOfEmitters();
     this.barChartMethod();
 
   }
 
   createRandNumOfEmitters() {
-    for (let i = 1; i < Math.floor(Math.random() * 15); i++) {
+    let emittersArrData: { x: number, y: number, r: number }[] = [];
+
+    for (let i = 1; i < Math.floor(Math.random() * MAX_EMITTERS_IN_GRAPH); i++) {
       let xVal = Math.floor(Math.random() * MAX_ANGLE);
       let xSign = Math.random() > 0.5 ? 1 : -1;
 
-      this.emittersArrData.push({
+      emittersArrData.push({
         x: xSign * xVal,
         y: Math.random() * MAX_FREQ,
         r: EMITTERS_RADIUS
       })
     }
+    return emittersArrData;
   }
 
   barChartMethod() {
@@ -45,19 +47,21 @@ export class BarChartComponent implements AfterViewInit {
       data: {
         datasets: [{
           label: 'First Dataset',
-          data: this.emittersArrData,
-          backgroundColor: 'rgb(0, 99, 132)'
+          data: this.createRandNumOfEmitters(),
+          backgroundColor: 'rgb(0, 99, 132)',
+          borderColor: 'rgba(0, 0, 0)',
+          borderWidth: 1,
         }]
       },
       options: {
         scales: {
           x: {
-            max: 180,
-            min: -180,
+            max: MAX_ANGLE,
+            min: MIN_ANGLE
           },
           y: {
-            max: 40,
-            min: 0,
+            max: MAX_FREQ,
+            min: MIN_FREQ
           }
         }
       }
