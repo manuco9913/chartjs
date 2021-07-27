@@ -2,13 +2,15 @@ import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angula
 import Chart, { TooltipItem } from 'chart.js/auto';
 import { CustomDataTypeService } from '../custom/custom-data-type.service';
 
-const EMITTERS_RADIUS = 10;
-const MAX_EMITTERS_IN_GRAPH = 100000;
+const EMITTERS_RADIUS = 15;
+const MAX_EMITTERS_IN_GRAPH = 1000;
 const MAX_FREQ = 40;
 const MIN_FREQ = 0;
 const MAX_ANGLE = 180;
 const MIN_ANGLE = -180;
 const DATA_REFRESHING_TIMEOUT = 20;
+const SHOW_EMITTERS_INTERVAL = 500;
+const BLINKING_TIME = 5000;
 
 let emittersAdditionalData: string[] = [];
 
@@ -43,22 +45,35 @@ export class BarChartComponent implements AfterViewInit {
         r: EMITTERS_RADIUS
       })
     }
-    this.barChart.update(undefined);
+
+    this.showNewEmitters();
+  }
+
+  showNewEmitters = () => {
+
+    const interval = setInterval(() => {
+      this.barChart.update('show');
+    }, SHOW_EMITTERS_INTERVAL);
+
+    setTimeout(() => {
+      clearInterval(interval);
+    }, BLINKING_TIME);
   }
 
   barChartMethod() {
 
-
     Chart.defaults.plugins.tooltip.displayColors = false;
     Chart.defaults.plugins.tooltip.titleAlign = 'center';
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0,80,80,0.8)';
+    Chart.defaults.elements.point.pointStyle = 'rect';
 
     this.barChart = new Chart(this.barCanvas.nativeElement, {
       type: 'bubble',
       data: {
+        labels: ['#', 'A', 'B', 'C', 'D'],
         datasets: [{
           data: [],
-          backgroundColor: 'rgb(0, 99, 132)',
+          backgroundColor: 'rgb(0, 200, 200)',
           borderColor: 'rgba(0, 0, 0)',
           borderWidth: 1,
         }]
@@ -82,7 +97,6 @@ export class BarChartComponent implements AfterViewInit {
                 tooltipItems.forEach(function (tooltipItem) {
                   tooltipText = `ID: ${tooltipItem.dataIndex}`;
                 });
-
                 return tooltipText;
               },
               label: function (tooltipItem: TooltipItem<'bubble'>) {
@@ -93,6 +107,23 @@ export class BarChartComponent implements AfterViewInit {
                 return emittersAdditionalData[tooltipItem.dataIndex];
               },
             },
+          },
+          datalabels: {
+            formatter: function (value, context) {
+              let labelsArr = context.chart.data.labels;
+              return labelsArr![context.dataIndex % labelsArr!.length];
+            },
+            color: 'black',
+            labels: {
+              title: {
+                font: {
+                  weight: 'bold'
+                }
+              },
+              value: {
+                color: 'green'
+              }
+            }
           }
         }
       }
