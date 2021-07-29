@@ -1,6 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import Chart, { TooltipItem } from 'chart.js/auto';
 import { InnerDataType } from '../custom/custom-data-type.service';
+import { Mutex, MutexInterface, Semaphore, SemaphoreInterface, withTimeout } from 'async-mutex';
 
 const EMITTERS_RADIUS = 15;
 const MAX_EMITTERS_IN_GRAPH = 10000;
@@ -14,7 +15,7 @@ const HIDE_EMITTERS_INTERVAL = 2 * SHOW_EMITTERS_INTERVAL;
 const BLINKING_TIME = 10000;
 const SHOWN_DATASET = 0;
 const HIDDEN_DATASET = 1;
-const DEBUGGING = false;
+const DEBUGGING = true;
 
 let emittersAdditionalData: string[] = [];
 
@@ -28,9 +29,11 @@ export class BarChartComponent implements AfterViewInit {
 
   @ViewChild('barCanvas') private barCanvas: ElementRef;
   barChart: Chart;
+  mutex: any;
 
   ngAfterViewInit(): void {
     this.barChartMethod();
+    this.mutex = new Mutex();
   }
 
   createRandNumOfEmitters = () => {
@@ -71,9 +74,11 @@ export class BarChartComponent implements AfterViewInit {
     indexes.forEach(index => {
       let emitter = (this.barChart.data.datasets[srcDataset].data[index]);//TODO: BUG: not working because DataElementType copy ctor is needed
 
-      // this.barChart.data.datasets[srcDataset].data.splice(index, 1);// splice removes element at index, 1 element
-      this.barChart.data.datasets[srcDataset].data[index] = null;
-      this.barChart.data.datasets[dstDataset].data[index] = emitter;
+      this.mutex
+        .runExclusive(() => {
+          this.barChart.data.datasets[srcDataset].data[index] = null;
+          this.barChart.data.datasets[dstDataset].data[index] = emitter;
+        });
     });
 
     this.barChart.update('none');
