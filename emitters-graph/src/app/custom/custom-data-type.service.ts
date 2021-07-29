@@ -1,33 +1,30 @@
-import { BubbleController, Chart, TooltipItem } from 'chart.js';
+import { BubbleController, BubbleDataPoint, Chart } from 'chart.js';
 
-export class CustomDataTypeService {
-
-  constructor(x = 0, y: any, r: any, arr: any) {
-    this.x = x;
-    this.y = y;
-    this.r = r;
-    this.arr = arr;
-  }
-
+export class InnerDataType implements BubbleDataPoint{
   x: number;
   y: number;
-  
-  // Bubble radius in pixels (not scaled).
   r: number;
-
-  // additional values
-  arr: string[];
+  status: string;
+  ident: string
 }
+export class MyBubbleChart extends BubbleController {
 
-class myBubbleC extends BubbleController {
+  // defaults: {
+  //   //datasetElementType: string | null | false,
 
+  //   dataElementType: InnerDataType | null
+  // }
+
+  // id: 'derivedBubble'
 
 };
-myBubbleC.id = 'derivedBubble';
-// myBubbleC.defaults = {
-//   // datasetElementType: CustomDataType,
-//   // dataElementType: CustomDataType,
-// };
+MyBubbleChart.id = 'derivedBubble';
+MyBubbleChart.defaults = {
+  // datasetElementType: CustomDataType,
+  dataElementType: InnerDataType,
+};
+
+
 
 // Stores the controller so that the chart initialization routine can look it up
-Chart.register(myBubbleC);
+Chart.register(MyBubbleChart);

@@ -1,16 +1,20 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import Chart, { TooltipItem } from 'chart.js/auto';
-import { CustomDataTypeService } from '../custom/custom-data-type.service';
+import { InnerDataType } from '../custom/custom-data-type.service';
 
 const EMITTERS_RADIUS = 15;
-const MAX_EMITTERS_IN_GRAPH = 1000;
+const MAX_EMITTERS_IN_GRAPH = 10000;
 const MAX_FREQ = 40;
 const MIN_FREQ = 0;
 const MAX_ANGLE = 180;
 const MIN_ANGLE = -180;
 const DATA_REFRESHING_TIMEOUT = 20;
-const SHOW_EMITTERS_INTERVAL = 500;
-const BLINKING_TIME = 5000;
+const SHOW_EMITTERS_INTERVAL = 1000;
+const HIDE_EMITTERS_INTERVAL = 2 * SHOW_EMITTERS_INTERVAL;
+const BLINKING_TIME = 10000;
+const SHOWN_DATASET = 0;
+const HIDDEN_DATASET = 1;
+const DEBUGGING = false;
 
 let emittersAdditionalData: string[] = [];
 
@@ -30,8 +34,7 @@ export class BarChartComponent implements AfterViewInit {
   }
 
   createRandNumOfEmitters = () => {
-    // this.barChart.data.datasets[0].data = [x:1,y:2,r:2,arr:8];
-    // this.barChart.data.datasets[0].data = [new CustomDataTypeService(1,2,2,8)];
+    const labelsArr = ['#', 'A', 'B', 'C', 'D'];
 
     for (let i = 1; i < Math.floor(Math.random() * MAX_EMITTERS_IN_GRAPH); i++) {
       let xVal = Math.floor(Math.random() * MAX_ANGLE);
@@ -39,24 +42,66 @@ export class BarChartComponent implements AfterViewInit {
 
       emittersAdditionalData.push(`Additional data of emitter ${i - 1}`)
 
-      this.barChart.data.datasets[0].data.push({
+      this.barChart.data.datasets[SHOWN_DATASET].data.push({
         x: xSign * xVal,
         y: Math.random() * MAX_FREQ,
-        r: EMITTERS_RADIUS
-      })
+        r: EMITTERS_RADIUS,
+        status: 'l',
+        ident: labelsArr[i % labelsArr.length]
+      } as InnerDataType)
     }
-
-    this.showNewEmitters();
+    this.barChart.data.datasets[HIDDEN_DATASET].data = new Array(this.barChart.data.datasets[SHOWN_DATASET].data.length);
+    [1, 5, 15, 20].forEach(index => {
+      this.barChart.data.datasets[HIDDEN_DATASET].data[index] = this.barChart.data.datasets[SHOWN_DATASET].data[index];
+      if (DEBUGGING) {
+        console.log('brigalllllllllllllllllllllll', this.barChart.data.datasets[SHOWN_DATASET].data[index]);
+        console.log('yabluthhhhhhhhhhhhhhhhhhhhhh', this.barChart.data.datasets[HIDDEN_DATASET].data[index]);
+      }
+    });
+    this.showNewEmitters([1, 5, 15, 20]);
   }
 
-  showNewEmitters = () => {
+  moveEmittersBetweenDatasets = (indexes: number[], srcDataset: number, dstDataset: number) => {
+    if (DEBUGGING) {
+      console.log('------------------------------------BEFORE-----------------------------------');
 
-    const interval = setInterval(() => {
-      this.barChart.update('show');
+      console.log("dataset = " + srcDataset, this.barChart.data.datasets[srcDataset].data);
+      console.log("dataset = " + dstDataset, this.barChart.data.datasets[dstDataset].data);
+    }
+    indexes.forEach(index => {
+      let emitter = (this.barChart.data.datasets[srcDataset].data[index]);//TODO: BUG: not working because DataElementType copy ctor is needed
+
+      // this.barChart.data.datasets[srcDataset].data.splice(index, 1);// splice removes element at index, 1 element
+      this.barChart.data.datasets[srcDataset].data[index] = null;
+      this.barChart.data.datasets[dstDataset].data[index] = emitter;
+    });
+
+    this.barChart.update('none');
+
+    if (DEBUGGING) {
+      console.log('------------------------------------AFTER-----------------------------------');
+
+      console.log("dataset = " + srcDataset, this.barChart.data.datasets[srcDataset].data);
+      console.log("dataset = " + dstDataset, this.barChart.data.datasets[dstDataset].data);
+    }
+  }
+
+  showNewEmitters = (newEmittersIndexes: number[]) => {
+
+    const interval_1 = setInterval(() => {
+      //show
+      this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
     }, SHOW_EMITTERS_INTERVAL);
 
+    const interval_2 = setInterval(() => {
+      //hide
+      this.moveEmittersBetweenDatasets(newEmittersIndexes, SHOWN_DATASET, HIDDEN_DATASET);
+    }, HIDE_EMITTERS_INTERVAL);
+
     setTimeout(() => {
-      clearInterval(interval);
+      clearInterval(interval_1);
+      clearInterval(interval_2);
+      this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
     }, BLINKING_TIME);
   }
 
@@ -70,12 +115,18 @@ export class BarChartComponent implements AfterViewInit {
     this.barChart = new Chart(this.barCanvas.nativeElement, {
       type: 'bubble',
       data: {
-        labels: ['#', 'A', 'B', 'C', 'D'],
         datasets: [{
+          label: 'Datatset 1',
           data: [],
-          backgroundColor: 'rgb(0, 200, 200)',
+          backgroundColor: 'rgba(0, 250, 250, 0.8)',
           borderColor: 'rgba(0, 0, 0)',
           borderWidth: 1,
+        }, {
+          label: 'Dataset 2',
+          data: [],
+          hidden: false,
+          backgroundColor: 'rgb(0, 255, 0)',
+          borderColor: 'rgba(0, 0, 0)',
         }]
       },
       options: {
@@ -101,7 +152,8 @@ export class BarChartComponent implements AfterViewInit {
               },
               label: function (tooltipItem: TooltipItem<'bubble'>) {
                 return [`Freq: ${tooltipItem.parsed.y.toFixed(2)}`,
-                `Angle: ${tooltipItem.parsed.x}`];
+                `Angle: ${tooltipItem.parsed.x}`,
+                `Ident: ${(tooltipItem.chart.data.datasets[SHOWN_DATASET].data[tooltipItem.dataIndex] as InnerDataType).ident}`];
               },
               afterLabel: function (tooltipItem: TooltipItem<'bubble'>) {
                 return emittersAdditionalData[tooltipItem.dataIndex];
@@ -110,8 +162,7 @@ export class BarChartComponent implements AfterViewInit {
           },
           datalabels: {
             formatter: function (value, context) {
-              let labelsArr = context.chart.data.labels;
-              return labelsArr![context.dataIndex % labelsArr!.length];
+              return (context.chart.data.datasets[SHOWN_DATASET].data[context.dataIndex] as InnerDataType).ident;
             },
             color: 'black',
             labels: {

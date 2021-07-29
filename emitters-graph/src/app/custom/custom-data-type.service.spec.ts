@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { CustomDataTypeService } from './custom-data-type.service';
+import { MyBubbleChart } from './custom-data-type.service';
 
 describe('CustomDataTypeService', () => {
-  let service: CustomDataTypeService;
+  let service: MyBubbleChart;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(CustomDataTypeService);
+    service = TestBed.inject(MyBubbleChart);
   });
 
   it('should be created', () => {
