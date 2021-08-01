@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import Chart, { TooltipItem } from 'chart.js/auto';
-import { InnerDataType } from '../custom/custom-data-type.service';
-import { Mutex, MutexInterface, Semaphore, SemaphoreInterface, withTimeout } from 'async-mutex';
+import { Mutex } from 'async-mutex';
+import { InnerDataTypeService } from '../shared/inner-data-type.service';
 
 const EMITTERS_RADIUS = 15;
 const MAX_EMITTERS_IN_GRAPH = 10000;
@@ -45,70 +45,76 @@ export class BarChartComponent implements AfterViewInit {
 
       emittersAdditionalData.push(`Additional data of emitter ${i - 1}`)
 
-      this.barChart.data.datasets[SHOWN_DATASET].data.push({
+      // this.barChart.data.datasets[SHOWN_DATASET].data.push({
+      //   x: xSign * xVal,
+      //   y: Math.random() * MAX_FREQ,
+      //   r: EMITTERS_RADIUS,
+      //   status: 'l',
+      //   ident: labelsArr[i % labelsArr.length]
+      // } as InnerDataTypeService)
+      
+      this.barChart.data.datasets[HIDDEN_DATASET].data.push({
         x: xSign * xVal,
         y: Math.random() * MAX_FREQ,
         r: EMITTERS_RADIUS,
         status: 'l',
         ident: labelsArr[i % labelsArr.length]
-      } as InnerDataType)
+      } as InnerDataTypeService)
+
+      this.barChart.update('none');
     }
-    this.barChart.data.datasets[HIDDEN_DATASET].data = new Array(this.barChart.data.datasets[SHOWN_DATASET].data.length);
-    [1, 5, 15, 20].forEach(index => {
-      this.barChart.data.datasets[HIDDEN_DATASET].data[index] = this.barChart.data.datasets[SHOWN_DATASET].data[index];
-      if (DEBUGGING) {
-        console.log('brigalllllllllllllllllllllll', this.barChart.data.datasets[SHOWN_DATASET].data[index]);
-        console.log('yabluthhhhhhhhhhhhhhhhhhhhhh', this.barChart.data.datasets[HIDDEN_DATASET].data[index]);
-      }
-    });
-    this.showNewEmitters([1, 5, 15, 20]);
+    // this.barChart.data.datasets[HIDDEN_DATASET].data = new Array(this.barChart.data.datasets[SHOWN_DATASET].data.length);
+    // [1, 5, 15, 20].forEach(index => {
+    //   this.barChart.data.datasets[HIDDEN_DATASET].data[index] = this.barChart.data.datasets[SHOWN_DATASET].data[index];
+    // });
+    // this.showNewEmitters([1, 5, 15, 20]);
   }
 
-  moveEmittersBetweenDatasets = (indexes: number[], srcDataset: number, dstDataset: number) => {
-    if (DEBUGGING) {
-      console.log('------------------------------------BEFORE-----------------------------------');
+  // moveEmittersBetweenDatasets = (indexes: number[], srcDataset: number, dstDataset: number) => {
+  //   if (DEBUGGING) {
+  //     console.log('------------------------------------BEFORE-----------------------------------');
 
-      console.log("dataset = " + srcDataset, this.barChart.data.datasets[srcDataset].data);
-      console.log("dataset = " + dstDataset, this.barChart.data.datasets[dstDataset].data);
-    }
-    indexes.forEach(index => {
-      let emitter = (this.barChart.data.datasets[srcDataset].data[index]);//TODO: BUG: not working because DataElementType copy ctor is needed
+  //     console.log("dataset = " + srcDataset, this.barChart.data.datasets[srcDataset].data);
+  //     console.log("dataset = " + dstDataset, this.barChart.data.datasets[dstDataset].data);
+  //   }
+  //   indexes.forEach(index => {
+  //     let emitter = (this.barChart.data.datasets[srcDataset].data[index]);//TODO: BUG: not working because DataElementType copy ctor is needed
 
-      this.mutex
-        .runExclusive(() => {
-          this.barChart.data.datasets[srcDataset].data[index] = null;
-          this.barChart.data.datasets[dstDataset].data[index] = emitter;
-        });
-    });
+  //     this.mutex
+  //       .runExclusive(() => {
+  //         (this.barChart.data.datasets[srcDataset].data[index] as InnerDataTypeService).setEmitterParamsTo(null);
+  //         (this.barChart.data.datasets[dstDataset].data[index] as InnerDataTypeService).setEmitterParamsTo(emitter as InnerDataTypeService);
+  //       });
+  //   });
 
-    this.barChart.update('none');
+  //   this.barChart.update('none');
 
-    if (DEBUGGING) {
-      console.log('------------------------------------AFTER-----------------------------------');
+  //   if (DEBUGGING) {
+  //     console.log('------------------------------------AFTER-----------------------------------');
 
-      console.log("dataset = " + srcDataset, this.barChart.data.datasets[srcDataset].data);
-      console.log("dataset = " + dstDataset, this.barChart.data.datasets[dstDataset].data);
-    }
-  }
+  //     console.log("dataset = " + srcDataset, this.barChart.data.datasets[srcDataset].data);
+  //     console.log("dataset = " + dstDataset, this.barChart.data.datasets[dstDataset].data);
+  //   }
+  // }
 
-  showNewEmitters = (newEmittersIndexes: number[]) => {
+  // showNewEmitters = (newEmittersIndexes: number[]) => {
 
-    const interval_1 = setInterval(() => {
-      //show
-      this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
-    }, SHOW_EMITTERS_INTERVAL);
+  //   const interval_1 = setInterval(() => {
+  //     //show
+  //     this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
+  //   }, SHOW_EMITTERS_INTERVAL);
 
-    const interval_2 = setInterval(() => {
-      //hide
-      this.moveEmittersBetweenDatasets(newEmittersIndexes, SHOWN_DATASET, HIDDEN_DATASET);
-    }, HIDE_EMITTERS_INTERVAL);
+  //   const interval_2 = setInterval(() => {
+  //     //hide
+  //     this.moveEmittersBetweenDatasets(newEmittersIndexes, SHOWN_DATASET, HIDDEN_DATASET);
+  //   }, HIDE_EMITTERS_INTERVAL);
 
-    setTimeout(() => {
-      clearInterval(interval_1);
-      clearInterval(interval_2);
-      this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
-    }, BLINKING_TIME);
-  }
+  //   setTimeout(() => {
+  //     clearInterval(interval_1);
+  //     clearInterval(interval_2);
+  //     this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
+  //   }, BLINKING_TIME);
+  // }
 
   barChartMethod() {
 
@@ -158,7 +164,7 @@ export class BarChartComponent implements AfterViewInit {
               label: function (tooltipItem: TooltipItem<'bubble'>) {
                 return [`Freq: ${tooltipItem.parsed.y.toFixed(2)}`,
                 `Angle: ${tooltipItem.parsed.x}`,
-                `Ident: ${(tooltipItem.chart.data.datasets[SHOWN_DATASET].data[tooltipItem.dataIndex] as InnerDataType).ident}`];
+                `Ident: ${(tooltipItem.chart.data.datasets[SHOWN_DATASET].data[tooltipItem.dataIndex] as InnerDataTypeService).ident}`];
               },
               afterLabel: function (tooltipItem: TooltipItem<'bubble'>) {
                 return emittersAdditionalData[tooltipItem.dataIndex];
@@ -167,7 +173,7 @@ export class BarChartComponent implements AfterViewInit {
           },
           datalabels: {
             formatter: function (value, context) {
-              return (context.chart.data.datasets[SHOWN_DATASET].data[context.dataIndex] as InnerDataType).ident;
+              return (context.chart.data.datasets[SHOWN_DATASET].data[context.dataIndex] as InnerDataTypeService).ident;
             },
             color: 'black',
             labels: {

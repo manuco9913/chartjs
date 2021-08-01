@@ -5,6 +5,7 @@ import { ChartModule } from 'angular2-chartjs';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BarChartComponent } from './bar-chart/bar-chart.component';
+import { InnerDataTypeService } from './shared/inner-data-type.service';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,7 @@ import { BarChartComponent } from './bar-chart/bar-chart.component';
     AppRoutingModule,
     ChartModule,
   ],
-  providers: [],
+  providers: [InnerDataTypeService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
