@@ -6,7 +6,10 @@ import { BubbleDataPoint } from 'chart.js';
 })
 export class InnerDataTypeService implements BubbleDataPoint {
   
-  constructor() {};
+  constructor() {
+    // this.isValid = false;
+    console.log(this.x, this.y);
+  };
 
   x: number;
   y: number;
@@ -15,18 +18,18 @@ export class InnerDataTypeService implements BubbleDataPoint {
   ident: string;
   isValid: boolean;
   
-  setEmitterParamsTo (param: InnerDataTypeService | null): void {
-    if (!param) {
-      this.isValid = false;
-      return;
-    }
-    this.isValid = true;
-    this.x = param.x;
-    this.y = param.y;
-    this.r = param.r;
-    this.status = param.status;
-    this.ident = param.ident;
-    return;
-  };
+  // public setEmitterParamsTo (param: InnerDataTypeService | null): void {
+  //   if (!param) {
+  //     this.isValid = false;
+  //     return;
+  //   }
+  //   this.isValid = true;
+  //   this.x = param.x;
+  //   this.y = param.y;
+  //   this.r = param.r;
+  //   this.status = param.status;
+  //   this.ident = param.ident;
+  //   return;
+  // };
 
 }

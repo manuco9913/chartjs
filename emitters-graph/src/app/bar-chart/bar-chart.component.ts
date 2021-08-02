@@ -30,6 +30,20 @@ export class BarChartComponent implements AfterViewInit {
   barChart: Chart;
   mutex: any;
 
+  // setEmitterParamsTo(srcParam: InnerDataTypeService, dstparam: InnerDataTypeService): void {
+  //   if (!srcParam) {
+  //     dstparam.isValid = false;
+  //     return;
+  //   }
+  //   dstparam.isValid = true;
+  //   dstparam.x = srcParam.x;
+  //   dstparam.y = srcParam.y;
+  //   dstparam.r = srcParam.r;
+  //   dstparam.status = srcParam.status;
+  //   dstparam.ident = srcParam.ident;
+  //   return;
+  // };
+
   ngAfterViewInit(): void {
     this.barChartMethod();
     this.mutex = new Mutex();
@@ -45,12 +59,12 @@ export class BarChartComponent implements AfterViewInit {
       emittersAdditionalData.push(`Additional data of emitter ${i - 1}`)
 
       this.barChart.data.datasets[SHOWN_DATASET].data.push({
-          x: xSign * xVal,
-          y: Math.random() * MAX_FREQ,
-          r: EMITTERS_RADIUS,
-          status: 'l',
-          ident: labelsArr[i % labelsArr.length]
-        } as InnerDataTypeService)
+        x: xSign * xVal,
+        y: Math.random() * MAX_FREQ,
+        r: EMITTERS_RADIUS,
+        status: 'l',
+        ident: labelsArr[i % labelsArr.length]
+      } as InnerDataTypeService)
 
       // this.barChart.data.datasets[HIDDEN_DATASET].data.push({
       //   x: xSign * xVal,
@@ -75,8 +89,8 @@ export class BarChartComponent implements AfterViewInit {
 
       this.mutex
         .runExclusive(() => {
-          (this.barChart.data.datasets[srcDataset].data[index] as InnerDataTypeService).setEmitterParamsTo(null);
-          (this.barChart.data.datasets[dstDataset].data[index] as InnerDataTypeService).setEmitterParamsTo(emitter as InnerDataTypeService);
+          this.barChart.data.datasets[srcDataset].data[index] = new InnerDataTypeService();//ector ;
+          this.barChart.data.datasets[dstDataset].data[index] = emitter;
         });
     });
 
