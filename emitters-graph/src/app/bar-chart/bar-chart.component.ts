@@ -19,7 +19,6 @@ const DEBUGGING = true;
 
 let emittersAdditionalData: string[] = [];
 
-
 @Component({
   selector: 'app-bar-chart',
   templateUrl: './bar-chart.component.html',
@@ -45,76 +44,64 @@ export class BarChartComponent implements AfterViewInit {
 
       emittersAdditionalData.push(`Additional data of emitter ${i - 1}`)
 
-      // this.barChart.data.datasets[SHOWN_DATASET].data.push({
+      this.barChart.data.datasets[SHOWN_DATASET].data.push({
+          x: xSign * xVal,
+          y: Math.random() * MAX_FREQ,
+          r: EMITTERS_RADIUS,
+          status: 'l',
+          ident: labelsArr[i % labelsArr.length]
+        } as InnerDataTypeService)
+
+      // this.barChart.data.datasets[HIDDEN_DATASET].data.push({
       //   x: xSign * xVal,
       //   y: Math.random() * MAX_FREQ,
       //   r: EMITTERS_RADIUS,
       //   status: 'l',
       //   ident: labelsArr[i % labelsArr.length]
       // } as InnerDataTypeService)
-      
-      this.barChart.data.datasets[HIDDEN_DATASET].data.push({
-        x: xSign * xVal,
-        y: Math.random() * MAX_FREQ,
-        r: EMITTERS_RADIUS,
-        status: 'l',
-        ident: labelsArr[i % labelsArr.length]
-      } as InnerDataTypeService)
 
       this.barChart.update('none');
     }
-    // this.barChart.data.datasets[HIDDEN_DATASET].data = new Array(this.barChart.data.datasets[SHOWN_DATASET].data.length);
-    // [1, 5, 15, 20].forEach(index => {
-    //   this.barChart.data.datasets[HIDDEN_DATASET].data[index] = this.barChart.data.datasets[SHOWN_DATASET].data[index];
-    // });
-    // this.showNewEmitters([1, 5, 15, 20]);
+    this.barChart.data.datasets[HIDDEN_DATASET].data = new Array(this.barChart.data.datasets[SHOWN_DATASET].data.length);
+    [1, 5, 15, 20].forEach(index => {
+      this.barChart.data.datasets[HIDDEN_DATASET].data[index] = this.barChart.data.datasets[SHOWN_DATASET].data[index];
+    });
+    this.showNewEmitters([1, 5, 15, 20]);
   }
 
-  // moveEmittersBetweenDatasets = (indexes: number[], srcDataset: number, dstDataset: number) => {
-  //   if (DEBUGGING) {
-  //     console.log('------------------------------------BEFORE-----------------------------------');
+  moveEmittersBetweenDatasets = (indexes: number[], srcDataset: number, dstDataset: number) => {
+    indexes.forEach(index => {
+      let emitter = this.barChart.data.datasets[srcDataset].data[index];//TODO: BUG: not working because DataElementType copy ctor is needed
 
-  //     console.log("dataset = " + srcDataset, this.barChart.data.datasets[srcDataset].data);
-  //     console.log("dataset = " + dstDataset, this.barChart.data.datasets[dstDataset].data);
-  //   }
-  //   indexes.forEach(index => {
-  //     let emitter = (this.barChart.data.datasets[srcDataset].data[index]);//TODO: BUG: not working because DataElementType copy ctor is needed
+      this.mutex
+        .runExclusive(() => {
+          (this.barChart.data.datasets[srcDataset].data[index] as InnerDataTypeService).setEmitterParamsTo(null);
+          (this.barChart.data.datasets[dstDataset].data[index] as InnerDataTypeService).setEmitterParamsTo(emitter as InnerDataTypeService);
+        });
+    });
 
-  //     this.mutex
-  //       .runExclusive(() => {
-  //         (this.barChart.data.datasets[srcDataset].data[index] as InnerDataTypeService).setEmitterParamsTo(null);
-  //         (this.barChart.data.datasets[dstDataset].data[index] as InnerDataTypeService).setEmitterParamsTo(emitter as InnerDataTypeService);
-  //       });
-  //   });
+    this.barChart.update('none');
 
-  //   this.barChart.update('none');
+  }
 
-  //   if (DEBUGGING) {
-  //     console.log('------------------------------------AFTER-----------------------------------');
+  showNewEmitters = (newEmittersIndexes: number[]) => {
 
-  //     console.log("dataset = " + srcDataset, this.barChart.data.datasets[srcDataset].data);
-  //     console.log("dataset = " + dstDataset, this.barChart.data.datasets[dstDataset].data);
-  //   }
-  // }
+    const interval_1 = setInterval(() => {
+      //show
+      this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
+    }, SHOW_EMITTERS_INTERVAL);
 
-  // showNewEmitters = (newEmittersIndexes: number[]) => {
+    const interval_2 = setInterval(() => {
+      //hide
+      this.moveEmittersBetweenDatasets(newEmittersIndexes, SHOWN_DATASET, HIDDEN_DATASET);
+    }, HIDE_EMITTERS_INTERVAL);
 
-  //   const interval_1 = setInterval(() => {
-  //     //show
-  //     this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
-  //   }, SHOW_EMITTERS_INTERVAL);
-
-  //   const interval_2 = setInterval(() => {
-  //     //hide
-  //     this.moveEmittersBetweenDatasets(newEmittersIndexes, SHOWN_DATASET, HIDDEN_DATASET);
-  //   }, HIDE_EMITTERS_INTERVAL);
-
-  //   setTimeout(() => {
-  //     clearInterval(interval_1);
-  //     clearInterval(interval_2);
-  //     this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
-  //   }, BLINKING_TIME);
-  // }
+    setTimeout(() => {
+      clearInterval(interval_1);
+      clearInterval(interval_2);
+      this.moveEmittersBetweenDatasets(newEmittersIndexes, HIDDEN_DATASET, SHOWN_DATASET);
+    }, BLINKING_TIME);
+  }
 
   barChartMethod() {
 
@@ -164,7 +151,7 @@ export class BarChartComponent implements AfterViewInit {
               label: function (tooltipItem: TooltipItem<'bubble'>) {
                 return [`Freq: ${tooltipItem.parsed.y.toFixed(2)}`,
                 `Angle: ${tooltipItem.parsed.x}`,
-                `Ident: ${(tooltipItem.chart.data.datasets[SHOWN_DATASET].data[tooltipItem.dataIndex] as InnerDataTypeService).ident}`];
+                `Ident: ${(tooltipItem.chart.data.datasets[tooltipItem.datasetIndex].data[tooltipItem.dataIndex] as InnerDataTypeService).ident}`];
               },
               afterLabel: function (tooltipItem: TooltipItem<'bubble'>) {
                 return emittersAdditionalData[tooltipItem.dataIndex];
@@ -173,7 +160,7 @@ export class BarChartComponent implements AfterViewInit {
           },
           datalabels: {
             formatter: function (value, context) {
-              return (context.chart.data.datasets[SHOWN_DATASET].data[context.dataIndex] as InnerDataTypeService).ident;
+              return (context.chart.data.datasets[context.datasetIndex].data[context.dataIndex] as InnerDataTypeService).ident;
             },
             color: 'black',
             labels: {
