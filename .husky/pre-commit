@@ -3,3 +3,4 @@
 
 cd emitters-graph
 npm run lint-front
+git add .
