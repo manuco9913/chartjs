@@ -24,7 +24,10 @@ export class MyTableComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
+    this.dataSource.paginator
+     =
+      this.paginator
+      ;
     this.table.dataSource = this.dataSource;
   }
 }
