@@ -5,12 +5,12 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
   title = 'emitters-graph';
 
-  constructor() { 
+  constructor() {
     // Register the plugin to all charts:
     Chart.register(ChartDataLabels);
   }

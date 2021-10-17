@@ -6,15 +6,20 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "prepare": "husky install",
+    "precommit": "lint-staged",
+    "pretty-quick": "pretty-quick"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "~12.0.2",
+    "@angular/cdk": "^12.2.2",
     "@angular/common": "~12.0.2",
     "@angular/compiler": "~12.0.2",
     "@angular/core": "~12.0.2",
     "@angular/forms": "~12.0.2",
+    "@angular/material": "^12.2.2",
     "@angular/platform-browser": "~12.0.2",
     "@angular/platform-browser-dynamic": "~12.0.2",
     "@angular/router": "~12.0.2",
@@ -23,6 +28,7 @@
     "chart.js": "^3.4.1",
     "chartjs-plugin-datalabels": "^2.0.0",
     "rxjs": "~6.6.0",
+    "save-dev": "0.0.1-security",
     "tslib": "^2.1.0",
     "zone.js": "~0.11.4"
   },
@@ -32,12 +38,25 @@
     "@angular/compiler-cli": "~12.0.2",
     "@types/jasmine": "~3.6.0",
     "@types/node": "^12.11.1",
+    "eslint": "^8.0.1",
+    "husky": "^7.0.2",
     "jasmine-core": "~3.7.0",
     "karma": "~6.3.0",
     "karma-chrome-launcher": "~3.1.0",
     "karma-coverage": "~2.0.3",
     "karma-jasmine": "~4.0.0",
     "karma-jasmine-html-reporter": "^1.5.0",
+    "lint-staged": "^11.2.3",
+    "prettier": "2.4.1",
     "typescript": "~4.2.3"
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --cache --fix",
+    "*.{ts,js,css,md}": ["prettier --write", "git add"]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   }
 }
