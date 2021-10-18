@@ -8,7 +8,7 @@ import { MyTableDataSource, MyTableItem } from './my-table-datasource';
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort
     @ViewChild(MatTable) table!: MatTable<MyTableItem>
-    dataSource: MyTableDataSource;
+    dataSource: MyTableDataSource
 
     /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
     displayedColumns = ['id', 'name'];
