@@ -20,6 +20,7 @@ export class MyTableComponent implements AfterViewInit {
 
     constructor() {
         this.dataSource = new MyTableDataSource();
+        console.log('d');
     }
 
     ngAfterViewInit(): void {
