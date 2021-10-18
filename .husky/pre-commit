@@ -1,6 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-cd ../emitters-graph
+cd emitters-graph
 npm run lint-front
 npm run pretty-quick
