@@ -10,7 +10,7 @@ import { MyTableDataSource, MyTableItem } from './my-table-datasource';
     styleUrls: ['./my-table.component.css'],
 })
 export class MyTableComponent implements AfterViewInit {
-    @ViewChild(MatPaginator) paginator!: MatPaginator
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort
     @ViewChild(MatTable) table!: MatTable<MyTableItem>
     dataSource: MyTableDataSource;
