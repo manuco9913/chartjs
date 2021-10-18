@@ -34,7 +34,6 @@
     "async-mutex": "^0.3.1",
     "chart.js": "^3.4.1",
     "chartjs-plugin-datalabels": "^2.0.0",
-    "pretty-quick": "^3.1.1",
     "rxjs": "~6.6.0",
     "save-dev": "0.0.1-security",
     "tslib": "^2.1.0",
