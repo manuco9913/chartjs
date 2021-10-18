@@ -3,5 +3,4 @@
 
 cd ../emitters-graph
 npm run lint-front
-npm run pretty-quicker
-git add .
+npm run pretty-quick
