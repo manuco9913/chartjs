@@ -3,5 +3,5 @@
 
 cd emitters-graph
 npm run lint-front
-npm run pretty-quicker
+npm run pretty-quickerd
 git add .
